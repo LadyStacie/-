@@ -1,0 +1,182 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Электронная обучающая система</title>
+    <asp:ContentPlaceHolder id="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <style type="text/css">
+        .text
+        {
+            background-color: #FFFFFF;
+        }
+        #leftcol
+        {
+            background-color: #FFFFCC;
+        }
+    </style>
+</head>
+<body>
+    <form id="main" runat="server">
+    <div id="header">
+        <div id="header2">
+            <div id="headermenu">
+                <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" StartingNodeOffset="0" />
+                <asp:Menu ID="mnuHeader" runat="server"
+                    CssClass="headermenulink"
+                    DataSourceID="SiteMapDataSource1"
+                    Orientation="Horizontal"
+                    MaximumDinamicDisplayLevels="0"
+                    SkipLinkText=""
+                    StaticDisplayLevels="2" />
+            </div>
+        </div>
+        <div id="loginbox">
+            <asp:LoginView ID="LoginView1" runat="server">
+                <AnonymousTemplate>
+                    <asp:Login ID="Login" runat="server" Width="100%"
+                    FailureAction="RedirectToLoginPage">
+                        <LayoutTemplate>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td width="60px">Логин:</td>
+                                    <td><asp:TextBox ID="UserName" runat="server" Width="95%" /></td>
+                                    <td width="5px" align="right">
+                                        <asp:RequiredFieldValidator ID="valRequireUserName"
+                                        runat="server" SetFocusOnError="true" Text="*"
+                                        ControlToValidate="UserName" ValidationGroup="Login" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Пароль:</td>
+                                    <td><asp:TextBox ID="Password" runat="server"
+                                    TextMode="Password" Width="95%" /></td>
+                                    <td width="5px" align="right">
+                                        <asp:RequiredFieldValidator ID="valRequirePassword"
+                                            runat="server" SetFocusOnError="true" Text="*"
+                                            ControlToValidate="Password" ValidationGroup="Login" />
+                                    </td>
+                                </tr>
+                            </table>
+                            <table>
+                                <tr>
+                                    <td align="right"><asp:Button ID="Submit" runat="server" 
+                                        CommandName="Login" ValidationGroup="Group" Text="Войти" />
+                                    </td>
+                                </tr>
+                            </table>  
+                        </LayoutTemplate>
+                    </asp:Login>
+                </AnonymousTemplate>
+                <LoggedInTemplate>
+                    <div id="welcomebox">
+                        <asp:LoginName ID="LoginName1" runat="server"
+                            FormatString="Здравствуй, {0}!" /><br />
+                            <small><asp:LoginStatus ID="LoginStatus1" runat="server" /></small>
+                    </div>
+                </LoggedInTemplate>
+            </asp:LoginView>
+        </div>
+    </div>
+    <div id="container">
+        <div id="container2">
+            <div id="centercol">
+                <div id="centercolcontent">
+                    <asp:ContentPlaceHolder id="MainContent" runat="server">
+                    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+                    <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>
+                    </asp:ContentPlaceHolder>
+                </div>
+            </div>
+        </div>
+        <div id="leftcol">
+        
+        <asp:SqlDataSource ID="SqlDataSource4" runat="server" 
+                    ConnectionString="<%$ ConnectionStrings:ConnectionString %>" 
+                    SelectCommand="SELECT ID, Name FROM Rezults"                          
+                    InsertCommand="INSERT INTO Rezults(ID, Name,Chapter, Result, Rating, AllQuest, RightQuest, LevelQuest) VALUES (@ID, @Name,1,0,0,0,0,0)" >      
+                    <InsertParameters>
+                        <asp:ControlParameter Name="ID" ControlID="IDLbl" />
+                        <asp:ProfileParameter Name="Name" PropertyName="UserName" />
+                    </InsertParameters>
+                </asp:SqlDataSource>
+                <asp:FormView ID="FormView2" runat="server" DataSourceID="SqlDataSource4" visible="true" 
+                    DataKeyNames="ID">
+                    <ItemTemplate>
+                        <asp:Label ID="IDLabel" runat="server" Text='<%# Eval("ID") %>' Visible = "false" />          
+                    </ItemTemplate>
+                </asp:FormView> 
+             <asp:Label ID="IDLbl" runat="server" Visible="false" />
+                 
+            <div class="sectiontitle">Содержание</div>
+            <div class="text">
+            <asp:SqlDataSource ID="SqlDataSource1" 
+                    runat="server" 
+                    ConnectionString="<%$ ConnectionStrings:ConnectionString %>" 
+                    SelectCommand="SELECT * FROM [Chapters]">
+                </asp:SqlDataSource>
+                <asp:DataList ID="DataList3" runat="server" DataKeyField="Number" 
+                    DataSourceID="SqlDataSource1" style="background-color: #FFFFCC" >
+                    <ItemTemplate>
+                        <asp:HyperLink ID="ChapterLnk" runat="server"
+                             NavigateUrl='<%# "Materials.aspx?Chapter="+Eval("Number")+"&Theme="+Eval("Number")+".1" %>'>
+                            Глава
+                            <asp:Label ID="NumberLabel" runat="server" Text='<%# Eval("Number") %>' />
+                            .<asp:Label ID="TitleLabel" runat="server" Text='<%# Eval("Title") %>' />
+                        </asp:HyperLink>
+                        <br />
+                        <asp:SqlDataSource ID="SqlDataSource2" runat="server" 
+                            ConnectionString="<%$ ConnectionStrings:ConnectionString %>"                            
+                            
+                            SelectCommand="SELECT * FROM [Themes] WHERE ([Chapter] = @Chapter) ORDER BY [Number]">
+                            <SelectParameters>
+                                <asp:ControlParameter ControlID="NumberLabel" Name="Chapter" 
+                                    PropertyName="Text" Type="Int32" />
+                            </SelectParameters>
+                        </asp:SqlDataSource>
+                        <asp:DataList ID="DataList4" runat="server" DataKeyField="Number" 
+                            DataSourceID="SqlDataSource2">
+                            <ItemTemplate>
+                                &nbsp;&nbsp;&nbsp;
+                                <asp:HyperLink ID="ThemeLnk" runat="server"
+                                    NavigateUrl='<%# "Materials.aspx?Chapter="+Eval("Chapter")+"&Theme="+Eval("Number") %>'>
+                                <asp:Label ID="NumberLabel" runat="server" Text='<%# Eval("Number") %>' />
+                                .<asp:Label ID="TitleLabel" runat="server" Text='<%# Eval("Title") %>' />
+                                </asp:HyperLink>
+                            </ItemTemplate>
+                        </asp:DataList>
+                        <asp:LinkButton ID="LinkButton1" runat="server" onClick="LinkButton1_Click" >
+                            <p style="font-style:oblique" > Тест по главе 
+                                <asp:Label ID="ChapterLbl" runat="server" Text='<%# Eval("Number") %>' />
+                            </p>
+                            </asp:LinkButton>
+                    </ItemTemplate>
+                </asp:DataList>
+                                
+               
+                                         
+               
+                
+            </div>
+            <asp:ContentPlaceHolder id="LeftContent" runat="server" />
+        </div>
+    </div>
+    <div id="footer">
+        <div id="footercontent">
+        <asp:ContentPlaceHolder id="FooterContent" runat="server"></asp:ContentPlaceHolder>
+        </div>
+        <br />
+        <br />
+        <div id="footermenu">
+            <asp:Menu ID="mnuFooter" runat="server" style="margin-left:auto; margin-right:auto;"
+                CssClass="footermenulink" DataSourceID="SiteMapDataSource1"
+                Orientation="Horizontal" MaximumDynamicDisplayLevels="0"
+                SkipLinkText="" StaticDisplayLevels="2" />
+                
+        </div>
+    </div>
+    </form>
+</body>
+</html>
